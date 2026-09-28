@@ -168,7 +168,7 @@ export function TaskDetailScreen() {
           }
           detail={task.due ? formatDay(task.due, today) : undefined}
         />
-        <div className="flex gap-2 border-b-[0.5px] border-separator px-4 py-2.5">
+        <div className="flex gap-2 overflow-x-auto whitespace-nowrap border-b-[0.5px] border-separator px-4 py-2.5">
           {[
             ['Today', today],
             ['Tomorrow', addDays(today, 1)],
@@ -265,7 +265,7 @@ export function TaskDetailScreen() {
                   aria-pressed={task.priority === p}
                   onClick={() => void save({ priority: task.priority === p ? null : p })}
                   className={`flex h-8 items-center gap-0.5 rounded-full px-2 text-[13px] font-semibold ${
-                    task.priority === p ? 'bg-accent text-white' : 'bg-label-3/25 text-label-2'
+                    task.priority === p ? `${toneBg(p)} text-white` : 'bg-label-3/25 text-label-2'
                   }`}
                 >
                   <Flag size={13} className={task.priority === p ? '' : toneText(p)} />P{p}
@@ -351,6 +351,11 @@ export function TaskDetailScreen() {
       </p>
     </Page>
   )
+}
+
+function toneBg(p: Task['priority']): string {
+  const tone = priorityTone(p)
+  return tone === 'bad' ? 'bg-bad' : tone === 'warn' ? 'bg-warn' : tone === 'accent' ? 'bg-accent' : 'bg-label-2'
 }
 
 function toneText(p: Task['priority']): string {

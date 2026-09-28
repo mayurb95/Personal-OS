@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.1 (28 Sep 2026)
+
+Fixes from a test run in a phone-sized browser:
+
+- Long back-button names no longer run into the screen title.
+- Enter creates a new collection.
+- A new habit's 26-week grid shows its empty weeks instead of a blank box.
+- Habit progress reads "2 of 8 glasses".
+- Date shortcuts on a task stay on one line; the selected priority shows its own colour.
+
 ## 0.2.0 — Phase 1, first pass (28 Sep 2026)
 
 The first version to use every day: tasks, habits and your own collections.

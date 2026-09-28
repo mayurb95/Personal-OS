@@ -32,8 +32,11 @@ export function habitProgress(s: HabitStatus): string {
   const value = s.today?.skipped ? null : s.today?.value ?? 0
   const parts: string[] = []
   if (s.today?.skipped) parts.push('Rest day')
-  else if (h.kind === 'count' || h.kind === 'measure' || h.kind === 'duration') {
+  else if (h.kind === 'duration') {
     parts.push(`${formatValue(h, value ?? 0)} of ${formatValue(h, h.target)}`)
+  } else if (h.kind === 'count' || h.kind === 'measure') {
+    const v = value ?? 0
+    parts.push(`${Number.isInteger(v) ? v : v.toFixed(1)} of ${formatValue(h, h.target)}`)
   } else if (h.kind === 'limit') {
     parts.push(`${value ?? 0} of max ${h.target}${h.unit ? ` ${h.unit}` : ''}`)
   } else if (h.kind === 'scale' && value) parts.push(`Scored ${value}`)

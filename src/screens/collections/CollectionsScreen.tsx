@@ -103,6 +103,7 @@ export function CollectionsScreen() {
               aria-label="Name"
             />
           </div>
+          <button type="submit" hidden aria-hidden="true" />
           <p className="mt-2 text-[13px] text-label-2">Tap the icon to pick an emoji. You’ll add fields next.</p>
         </form>
       </Sheet>

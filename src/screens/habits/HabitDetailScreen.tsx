@@ -152,7 +152,8 @@ function Stat({ label, value, icon }: { label: string; value: string | number; i
 }
 
 function cellClass(habit: Habit, day: string, log: HabitLog | undefined, today: string): string {
-  if (day > today || day < habit.startDate) return 'bg-transparent'
+  if (day > today) return 'bg-transparent'
+  if (day < habit.startDate) return 'bg-label-3/10'
   if (log?.skipped) return 'bg-label-3/50'
   if (isDone(habit, log) && (habit.kind !== 'limit' || day < today)) {
     if (habit.kind === 'limit' && !log) return 'bg-good/60'

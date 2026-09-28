@@ -25,7 +25,7 @@ export function NavBar({
   }
   return (
     <header className="sticky top-0 z-20 border-b-[0.5px] border-separator bg-bar pt-[env(safe-area-inset-top)] backdrop-blur-xl">
-      <div className="grid h-11 grid-cols-[1fr_auto_1fr] items-center px-2">
+      <div className="grid h-11 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1 px-2">
         <div className="flex min-w-0 items-center">
           {back && (
             <Link
@@ -38,7 +38,7 @@ export function NavBar({
             </Link>
           )}
         </div>
-        <div className="max-w-[55vw] truncate text-center text-[17px] font-semibold">{title}</div>
+        <div className="max-w-[50vw] truncate text-center text-[17px] font-semibold">{title}</div>
         <div className="flex items-center justify-end gap-3 pr-2">{right}</div>
       </div>
     </header>
