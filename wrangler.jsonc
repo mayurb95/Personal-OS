@@ -1,0 +1,12 @@
+{
+  // Cloudflare Workers static-assets config, used when the project is deployed through
+  // "Workers & Pages → Create → Import a repository" (build + `npx wrangler deploy`).
+  // Cloudflare Pages ignores this file.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "personal-os",
+  "compatibility_date": "2026-09-28",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
