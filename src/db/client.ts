@@ -3,6 +3,7 @@
  *
  *   const info = await db().call('init')
  */
+import { MUTATIONS } from './mutations'
 import type { DbCallName, DbCalls, DbRequest, DbResponse } from './protocol'
 
 type Pending = { resolve: (value: unknown) => void; reject: (error: Error) => void }
@@ -31,15 +32,35 @@ export class DbClient {
 
   call<K extends DbCallName>(
     call: K,
-    ...args: DbCalls[K][0] extends undefined ? [] : [DbCalls[K][0]]
+    ...args: undefined extends DbCalls[K][0] ? [payload?: DbCalls[K][0]] : [payload: DbCalls[K][0]]
   ): Promise<DbCalls[K][1]> {
     const id = this.nextId++
     const request: DbRequest<K> = { id, call, payload: args[0] as DbCalls[K][0] }
-    return new Promise((resolve, reject) => {
+    const result = new Promise<DbCalls[K][1]>((resolve, reject) => {
       this.pending.set(id, { resolve: resolve as (value: unknown) => void, reject })
       this.worker.postMessage(request)
     })
+    if (MUTATIONS.has(call)) return result.then((value) => (notifyChange(), value))
+    return result
   }
+}
+
+// Screens subscribe to this to refresh after any change to the data.
+let version = 0
+const listeners = new Set<() => void>()
+
+function notifyChange(): void {
+  version++
+  for (const listener of listeners) listener()
+}
+
+export function dataVersion(): number {
+  return version
+}
+
+export function onDataChange(listener: () => void): () => void {
+  listeners.add(listener)
+  return () => listeners.delete(listener)
 }
 
 let client: DbClient | null = null

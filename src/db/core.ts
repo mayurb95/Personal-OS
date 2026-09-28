@@ -17,6 +17,99 @@ export const MIGRATIONS: readonly string[] = [
      key   TEXT PRIMARY KEY,
      value TEXT NOT NULL
    ) STRICT;`,
+
+  // 2 — the engine: collections of records with user-defined fields, full-text search,
+  //     and habit check-ins.
+  `CREATE TABLE collections (
+     id          TEXT PRIMARY KEY,
+     kind        TEXT NOT NULL DEFAULT 'custom',
+     name        TEXT NOT NULL,
+     icon        TEXT NOT NULL DEFAULT '📁',
+     settings    TEXT NOT NULL DEFAULT '{}' CHECK (json_valid(settings)),
+     sort        INTEGER NOT NULL DEFAULT 0,
+     created_at  TEXT NOT NULL,
+     updated_at  TEXT NOT NULL,
+     archived_at TEXT
+   ) STRICT;
+
+   CREATE TABLE fields (
+     id            TEXT PRIMARY KEY,
+     collection_id TEXT NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
+     key           TEXT NOT NULL,
+     name          TEXT NOT NULL,
+     type          TEXT NOT NULL,
+     options       TEXT NOT NULL DEFAULT '{}' CHECK (json_valid(options)),
+     sort          INTEGER NOT NULL DEFAULT 0,
+     builtin       INTEGER NOT NULL DEFAULT 0,
+     hidden        INTEGER NOT NULL DEFAULT 0,
+     created_at    TEXT NOT NULL,
+     UNIQUE (collection_id, key)
+   ) STRICT;
+
+   CREATE TABLE records (
+     id            TEXT PRIMARY KEY,
+     collection_id TEXT NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
+     title         TEXT NOT NULL DEFAULT '',
+     data          TEXT NOT NULL DEFAULT '{}' CHECK (json_valid(data)),
+     body          TEXT NOT NULL DEFAULT '',
+     created_at    TEXT NOT NULL,
+     updated_at    TEXT NOT NULL,
+     deleted_at    TEXT
+   ) STRICT;
+
+   CREATE INDEX records_by_collection ON records (collection_id, deleted_at, updated_at);
+   CREATE INDEX records_task_due ON records (json_extract(data, '$.due'))
+     WHERE collection_id = 'tasks';
+
+   CREATE TABLE habit_logs (
+     habit_id   TEXT NOT NULL REFERENCES records(id) ON DELETE CASCADE,
+     day        TEXT NOT NULL,
+     value      REAL NOT NULL DEFAULT 0,
+     skipped    INTEGER NOT NULL DEFAULT 0,
+     note       TEXT NOT NULL DEFAULT '',
+     updated_at TEXT NOT NULL,
+     PRIMARY KEY (habit_id, day)
+   ) STRICT, WITHOUT ROWID;
+
+   CREATE VIRTUAL TABLE records_fts USING fts5(
+     title, body,
+     content = 'records', content_rowid = 'rowid',
+     tokenize = 'unicode61 remove_diacritics 2'
+   );
+   CREATE TRIGGER records_fts_insert AFTER INSERT ON records BEGIN
+     INSERT INTO records_fts (rowid, title, body) VALUES (new.rowid, new.title, new.body);
+   END;
+   CREATE TRIGGER records_fts_delete AFTER DELETE ON records BEGIN
+     INSERT INTO records_fts (records_fts, rowid, title, body)
+       VALUES ('delete', old.rowid, old.title, old.body);
+   END;
+   CREATE TRIGGER records_fts_update AFTER UPDATE OF title, body ON records BEGIN
+     INSERT INTO records_fts (records_fts, rowid, title, body)
+       VALUES ('delete', old.rowid, old.title, old.body);
+     INSERT INTO records_fts (rowid, title, body) VALUES (new.rowid, new.title, new.body);
+   END;`,
+
+  // 3 — built-in Tasks and Habits collections.
+  `INSERT INTO collections (id, kind, name, icon, sort, created_at, updated_at) VALUES
+     ('tasks',  'tasks',  'Tasks',  '✅', -2, strftime('%Y-%m-%dT%H:%M:%fZ'), strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('habits', 'habits', 'Habits', '🔁', -1, strftime('%Y-%m-%dT%H:%M:%fZ'), strftime('%Y-%m-%dT%H:%M:%fZ'));
+
+   INSERT INTO fields (id, collection_id, key, name, type, options, sort, builtin, created_at) VALUES
+     ('tasks.due',          'tasks', 'due',          'Due date',   'date',        '{}', 1, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('tasks.time',         'tasks', 'time',         'Time',       'time',        '{}', 2, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('tasks.priority',     'tasks', 'priority',     'Priority',   'priority',    '{}', 3, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('tasks.project',      'tasks', 'project',      'Project',    'select',      '{"choices":[]}', 4, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('tasks.tags',         'tasks', 'tags',         'Tags',       'multiselect', '{"choices":[]}', 5, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('tasks.someday',      'tasks', 'someday',      'Someday',    'checkbox',    '{}', 6, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('tasks.done',         'tasks', 'done',         'Done',       'checkbox',    '{}', 7, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('tasks.completed_at', 'tasks', 'completed_at', 'Completed',  'datetime',    '{}', 8, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('tasks.recurrence',   'tasks', 'recurrence',   'Repeat',     'json',        '{}', 9, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('habits.kind',        'habits', 'kind',        'Type',       'text',        '{}', 1, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('habits.target',      'habits', 'target',      'Target',     'number',      '{}', 2, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('habits.unit',        'habits', 'unit',        'Unit',       'text',        '{}', 3, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('habits.schedule',    'habits', 'schedule',    'Schedule',   'json',        '{}', 4, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('habits.part_of_day', 'habits', 'part_of_day', 'Time of day','text',        '{}', 5, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('habits.archived',    'habits', 'archived',    'Archived',   'checkbox',    '{}', 6, 1, strftime('%Y-%m-%dT%H:%M:%fZ'));`,
 ]
 
 export function schemaVersion(db: Database): number {

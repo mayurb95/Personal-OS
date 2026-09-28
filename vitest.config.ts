@@ -5,6 +5,8 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   test: {
     environment: 'node',
+    // Match the owner's time zone so date tests behave like the phone.
+    env: { TZ: 'Asia/Kolkata' },
     include: ['src/**/*.test.ts'],
   },
 })

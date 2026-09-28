@@ -2,6 +2,7 @@
  * Messages between the app (main thread) and the database Web Worker.
  * Every request carries an id; the worker answers with the same id.
  */
+import type { Api } from '../engine/api'
 import type { BenchmarkResult, DbFeatures, LaunchInfo } from './core'
 
 export type StorageMode = 'opfs' | 'memory'
@@ -14,12 +15,19 @@ export interface InitResult {
   initMs: number
 }
 
-/** Request name → [payload, result]. Add new calls here. */
-export interface DbCalls {
+/** Worker-level calls that aren't part of the engine API. */
+export interface SystemCalls {
   init: [undefined, InitResult]
   recordLaunch: [undefined, LaunchInfo]
   benchmark: [{ rows: number }, BenchmarkResult]
 }
+
+type ApiCalls = {
+  [K in keyof Api]: [Parameters<Api[K]>[1], ReturnType<Api[K]>]
+}
+
+/** Call name → [payload, result]. */
+export type DbCalls = SystemCalls & ApiCalls
 
 export type DbCallName = keyof DbCalls
 

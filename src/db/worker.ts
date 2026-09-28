@@ -8,8 +8,10 @@
  * reports why, so the app can warn instead of silently losing data.
  */
 import sqlite3InitModule, { type Database } from '@sqlite.org/sqlite-wasm'
+import { api, type ApiName } from '../engine/api'
+import { emptyTrash } from '../engine/records'
 import { getFeatures, migrate, recordLaunch, runBenchmark } from './core'
-import type { DbCallName, DbCalls, DbRequest, DbResponse, InitResult, StorageMode } from './protocol'
+import type { DbRequest, DbResponse, InitResult, StorageMode, SystemCalls } from './protocol'
 
 // Typed view of the worker global, so this file can share the DOM-based tsconfig.
 const ctx = self as unknown as {
@@ -45,6 +47,12 @@ async function init(): Promise<InitResult> {
   }
   db.exec('PRAGMA foreign_keys = ON;')
   migrate(db)
+  // Housekeeping: items in the trash for more than 30 days are deleted for good.
+  try {
+    emptyTrash(db, { olderThanDays: 30 })
+  } catch {
+    // Never block startup on housekeeping.
+  }
   return {
     storage,
     storageError,
@@ -58,9 +66,11 @@ function ensureInit(): Promise<InitResult> {
   return initPromise
 }
 
-type Handler<K extends DbCallName> = (payload: DbCalls[K][0]) => Promise<DbCalls[K][1]>
+type SystemHandler<K extends keyof SystemCalls> = (
+  payload: SystemCalls[K][0],
+) => Promise<SystemCalls[K][1]>
 
-const handlers: { [K in DbCallName]: Handler<K> } = {
+const system: { [K in keyof SystemCalls]: SystemHandler<K> } = {
   init: () => ensureInit(),
   recordLaunch: async () => {
     await ensureInit()
@@ -72,14 +82,24 @@ const handlers: { [K in DbCallName]: Handler<K> } = {
   },
 }
 
+async function handle(call: string, payload: unknown): Promise<unknown> {
+  if (call in system) {
+    return (system[call as keyof SystemCalls] as (p: unknown) => Promise<unknown>)(payload)
+  }
+  if (call in api) {
+    await ensureInit()
+    const fn = api[call as ApiName] as (database: Database, p: unknown) => unknown
+    return fn(db!, payload ?? {})
+  }
+  throw new Error(`Unknown database call: ${call}`)
+}
+
 ctx.onmessage = async (event) => {
   const { id, call, payload } = event.data
   try {
-    const handler = handlers[call] as Handler<DbCallName>
-    if (!handler) throw new Error(`Unknown database call: ${call}`)
-    const result = await handler(payload as never)
+    const result = await handle(call, payload)
     ctx.postMessage({ id, ok: true, result })
   } catch (error) {
-    ctx.postMessage({ id, ok: false, error: describe(error) })
+    ctx.postMessage({ id, ok: false, error: error instanceof Error ? error.message : String(error) })
   }
 }
