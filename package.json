@@ -1,7 +1,7 @@
 {
   "name": "personal-os",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.2.0",
   "type": "module",
   "description": "Personal OS: an offline-first PWA for iPhone combining notes, databases, tasks, habits, workouts, journal, expenses and reading.",
   "scripts": {

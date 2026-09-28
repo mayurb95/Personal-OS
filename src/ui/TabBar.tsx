@@ -1,8 +1,11 @@
 import { NavLink } from 'react-router'
+import { Ellipsis, Flame } from './Icons'
 
 const tabs = [
-  { to: '/', label: 'Today', icon: TodayIcon },
-  { to: '/system', label: 'System check', icon: CheckIcon },
+  { to: '/', label: 'Today', icon: TodayIcon, end: true },
+  { to: '/tasks', label: 'Tasks', icon: TasksIcon, end: false },
+  { to: '/habits', label: 'Habits', icon: HabitsIcon, end: false },
+  { to: '/more', label: 'More', icon: MoreIcon, end: false },
 ]
 
 /** Bottom tab bar, iOS style, clear of the Home indicator. */
@@ -12,11 +15,11 @@ export function TabBar() {
       className="grid shrink-0 border-t-[0.5px] border-separator bg-bar pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
       style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
     >
-      {tabs.map(({ to, label, icon: Icon }) => (
+      {tabs.map(({ to, label, icon: Icon, end }) => (
         <NavLink
           key={to}
           to={to}
-          end
+          end={end}
           className={({ isActive }) =>
             `flex flex-col items-center gap-0.5 pb-1 pt-1.5 text-[10px] font-medium ${
               isActive ? 'text-accent' : 'text-label-2'
@@ -41,16 +44,23 @@ function TodayIcon() {
   )
 }
 
-function CheckIcon() {
+function TasksIcon() {
   return (
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M12 3.5l7 2.8v5.2c0 4.3-2.9 7.7-7 9-4.1-1.3-7-4.7-7-9V6.3l7-2.8z"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinejoin="round"
-      />
-      <path d="M8.8 12.2l2.2 2.2 4.3-4.6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M8.3 12.3l2.4 2.4 5-5.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
+  )
+}
+
+function HabitsIcon() {
+  return <Flame size={26} strokeWidth={1.7} />
+}
+
+function MoreIcon() {
+  return (
+    <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full border-[1.7px] border-current">
+      <Ellipsis size={18} />
+    </span>
   )
 }

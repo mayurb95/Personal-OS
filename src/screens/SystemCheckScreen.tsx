@@ -19,7 +19,8 @@ import {
   type StorageEstimateInfo,
 } from '../lib/environment'
 import { ButtonRow, Row, Section, type Status } from '../ui/List'
-import { Screen } from '../ui/Screen'
+import { NavBar } from '../ui/NavBar'
+import { Page } from '../ui/Screen'
 
 interface EnvState {
   standalone: boolean
@@ -105,7 +106,9 @@ export function SystemCheckScreen() {
   const onDevice = database?.storage === 'opfs'
 
   return (
-    <Screen title="System check" subtitle="Phase 0">
+    <Page>
+      <NavBar back={{ to: '/more', label: 'More' }} title="System check" />
+      <div className="pt-4" />
       <Section
         title="App"
         footer={
@@ -232,7 +235,7 @@ export function SystemCheckScreen() {
       <Section title="Report" footer="Paste the report into the chat with Claude.">
         <ButtonRow onClick={copyReport}>{copied ? 'Copied' : 'Copy report'}</ButtonRow>
       </Section>
-    </Screen>
+    </Page>
   )
 }
 

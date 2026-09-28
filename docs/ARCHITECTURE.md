@@ -21,13 +21,29 @@ Outside (later phases): OneDrive (backups, vault mirror, Reminders bridge files)
 | `src/app/` | App shell: router, startup sequence, update banner |
 | `src/screens/` | One file per screen |
 | `src/ui/` | Reusable iOS-style components (lists, screen header, tab bar) |
-| `src/db/` | Database: `core.ts` (SQL logic, testable in Node), `worker.ts` (owns the connection), `client.ts` (UI-side handle), `protocol.ts` (message types) |
+| `src/db/` | Database plumbing: `core.ts` (migrations, launch counter), `worker.ts` (owns the connection), `client.ts` (UI-side handle and change notifications), `protocol.ts` (message types), `mutations.ts` (calls that change data) |
+| `src/engine/` | The engine, plain functions over a `Database`: `collections.ts`, `records.ts` (CRUD, trash, search), `tasks.ts`, `quickadd.ts`, `recurrence.ts`, `habits.ts`, `today.ts`, `dates.ts`; `api.ts` lists every call the UI can make |
+| `src/app/data.ts` | `useDbQuery` (auto-refreshing reads), `act` (writes with error toasts), `useToday` |
+| `src/screens/<area>/` | Screens by area: `tasks/`, `habits/`, `collections/` |
 | `src/lib/` | Browser helpers with no UI |
 | `public/` | Static files copied as-is: icons, `_headers` for Cloudflare |
 | `scripts/` | One-off tools, e.g. icon generation |
 | `docs/` | PRD, architecture, setup |
 
-Later phases add `src/engine/` (collections, fields, views, formulas), `src/modules/<name>/` (tasks, habits, workouts, …), `src/vault/` (Markdown notes) and `src/sync/` (OneDrive).
+Later phases add `src/vault/` (Markdown notes), `src/sync/` (OneDrive) and more modules under `src/engine/` and `src/screens/`.
+
+## Data model
+
+| Table | Holds |
+| --- | --- |
+| `collections` | Built-in (`tasks`, `habits`) and user collections; `settings` JSON keeps the default view (layout, sort) |
+| `fields` | Each collection's fields: key, type, options (choices, rating max), order; built-in fields can't be removed |
+| `records` | Every item: `title`, `data` (JSON keyed by field key), `body` (notes), timestamps, `deleted_at` for the trash |
+| `records_fts` | FTS5 index over title and body, kept in sync by triggers |
+| `habit_logs` | One row per habit per day: value, skipped (rest day) |
+| `app_meta` | Key/value facts such as the launch counter |
+
+Tasks and habits are records in their built-in collections, so later features (custom fields, views, search) work on them too. Habit check-ins live in their own table because streaks read hundreds of days at once.
 
 ## Decisions
 
@@ -37,6 +53,8 @@ Later phases add `src/engine/` (collections, fields, views, formulas), `src/modu
 | **All database access in one Web Worker** | Keeps the UI smooth; the worker is the only place with a connection. The UI calls it through `db().call(name, payload)`, typed by `src/db/protocol.ts`. |
 | **SQL logic in `core.ts`, separate from the worker** | The same functions run against an in-memory database in Vitest, so the engine is tested without a browser. |
 | **Migrations in `MIGRATIONS`, tracked by `PRAGMA user_version`** | Simple and reliable. Shipped migrations are never edited; add a new entry instead. The app refuses a database newer than itself. |
+| **Every UI read is `useDbQuery`, every write is `act`** | After any write listed in `src/db/mutations.ts`, all open queries re-run, so screens never show stale data. A test checks that write-like calls are listed. |
+| **Dates as local `YYYY-MM-DD` strings** | Due dates, habit days and "today" are calendar days in the phone's time zone; arithmetic in `src/engine/dates.ts` never shifts a day. Timestamps (created, completed) stay in UTC ISO. |
 | **Record values as JSON (from Phase 1)** | User-defined fields change at runtime; a JSON column plus indexes on hot fields avoids migrations for every new field. |
 | **Service worker in "prompt" mode** | New versions download in the background; the app shows an "Update" banner rather than reloading while the user is typing. Update checks also run when the app returns to the foreground, since iOS rarely checks on its own. |
 | **Request persistent storage at startup (Home Screen only)** | WebKit grants it more readily to installed apps; it protects data from automatic clean-up. OneDrive backups remain the safety net. |
