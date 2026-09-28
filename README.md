@@ -2,9 +2,9 @@
 
 An offline-first Progressive Web App (PWA) for iPhone that brings Obsidian-style notes, Notion-style databases, tasks, habits, workouts, journal, expenses and reading into one private app, backed up to OneDrive.
 
-It is a personal, single-user app. There is no server of its own: the app is static files on Cloudflare Pages, and all data lives on the iPhone, with backups in the owner's OneDrive.
+It is a personal, single-user app. There is no server of its own: the app is static files hosted on Cloudflare, and all data lives on the iPhone, with backups in the owner's OneDrive.
 
-**Status:** Phase 0 (setup and feasibility checks). See [CHANGELOG.md](CHANGELOG.md).
+**Status:** Phase 0 complete (checks passed on the iPhone); Phase 1 next. See [CHANGELOG.md](CHANGELOG.md).
 
 ## Documents
 
@@ -18,7 +18,7 @@ It is a personal, single-user app. There is no server of its own: the app is sta
 
 ## Install on iPhone
 
-1. Open the app's address (for example `https://personal-os.pages.dev`) in **Safari**.
+1. Open the app's address (for example `https://personal-os.<account>.workers.dev`) in **Safari**.
 2. Tap **Share**, then **Add to Home Screen**, then **Add**.
 3. Open **Personal OS** from its Home Screen icon. Always use the icon, not a Safari tab: the two have separate storage.
 
@@ -35,7 +35,7 @@ npm run build      # production build into dist/
 npm run preview    # serve the production build locally
 ```
 
-Pushing to `main` deploys automatically through Cloudflare Pages.
+Pushing to `main` deploys automatically through Cloudflare (see [docs/SETUP.md](docs/SETUP.md)).
 
 ## Tech stack
 

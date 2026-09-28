@@ -2,20 +2,21 @@
 
 One-time steps to host the app and install it on the iPhone. Nothing here needs a Mac or a paid Apple account.
 
-## 1. Cloudflare Pages (hosting)
+## 1. Cloudflare (hosting)
+
+The app is deployed as a Cloudflare Worker serving static files (set up on 28 Sep 2026).
 
 1. Sign in at [dash.cloudflare.com](https://dash.cloudflare.com) (free account).
-2. Go to **Workers & Pages → Create → Pages → Connect to Git**.
-3. Connect GitHub and choose the `Personal-OS` repository.
-4. Build settings:
-   - Framework preset: **None** (or Vite)
+2. Go to **Workers & Pages → Create → Import a repository**, connect GitHub and choose `Personal-OS`.
+3. Settings:
+   - Project name: `personal-os`
    - Build command: `npm run build`
-   - Build output directory: `dist`
-   - Production branch: `main`
-5. **Save and Deploy.** The first build takes a couple of minutes.
-6. Note the address it gives you, for example `https://personal-os-xyz.pages.dev`.
+   - Deploy command: `npx wrangler deploy` (reads `wrangler.jsonc`, which serves `dist/`)
+4. **Deploy.** The address looks like `https://personal-os.<account>.workers.dev`.
 
-Every push to `main` now redeploys automatically. Node.js 22 is picked up from `.node-version`.
+Every push to `main` redeploys automatically. Node.js 22 is picked up from `.node-version`, and `public/_headers` sets the response headers.
+
+Cloudflare Pages also works (build command `npm run build`, output directory `dist`); it ignores `wrangler.jsonc`.
 
 ## 2. Install on the iPhone
 

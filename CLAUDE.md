@@ -34,4 +34,4 @@ Run `npm test` and `npm run build` before every commit. Both must pass.
 
 ## Target
 
-iPhone, iOS 26 or later, installed to the Home Screen from Safari. Also usable in desktop Chrome, Edge and Safari for development.
+iPhone, iOS 18 or later (the owner's phone runs iOS 18.1 as of Sep 2026), installed to the Home Screen from Safari. Features that need a newer Safari (for example Screen Wake Lock, Safari 18.4) must check for support and degrade gracefully. Also usable in desktop Chrome, Edge and Safari for development.

@@ -11,7 +11,7 @@ Installed web app (Safari, Home Screen)
 Outside (later phases): OneDrive (backups, vault mirror, Reminders bridge files), Google Calendar
 ```
 
-- **No server.** The app is static files on Cloudflare Pages. Nothing about the user's data is sent anywhere except their OneDrive and (read-only) Google Calendar.
+- **No server.** The app is static files served by Cloudflare (Workers static assets, `wrangler.jsonc`). Nothing about the user's data is sent anywhere except their OneDrive and (read-only) Google Calendar.
 - **The iPhone holds the only editable copy.** OneDrive gets one-way backups and a read-only vault mirror (Phase 1 and 3).
 
 ## Folders
@@ -52,6 +52,12 @@ Later phases add `src/engine/` (collections, fields, views, formulas), `src/modu
 - No widgets, share-sheet target or direct access to Reminders/Calendar/Health (see PRD).
 - Test on the real iPhone after every iOS update; note any workaround here.
 
+## Device results
+
+| Date | Device | Result |
+| --- | --- | --- |
+| 28 Sep 2026 | iPhone, iOS 18.1.1 | Installed, offline ready, protected storage granted, SQLite in OPFS opened in 49 ms, data survived restarts; 1,000-record write 48 ms, summary 12 ms, search 1 ms |
+
 ## Known workarounds
 
-_None yet._
+- iOS 18.1 lacks Screen Wake Lock (Safari 18.4+). Feature-detect it; on older versions the workout screen may dim.

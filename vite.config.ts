@@ -7,8 +7,9 @@ import { readFileSync } from 'node:fs'
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as {
   version: string
 }
-// Cloudflare Pages sets CF_PAGES_COMMIT_SHA during its build; local builds show "local".
-const commit = process.env.CF_PAGES_COMMIT_SHA?.slice(0, 7) ?? 'local'
+// Cloudflare sets the commit during its build (Workers Builds or Pages); local builds show "local".
+const commit =
+  (process.env.WORKERS_CI_COMMIT_SHA ?? process.env.CF_PAGES_COMMIT_SHA)?.slice(0, 7) ?? 'local'
 
 // Personal OS build config. See docs/ARCHITECTURE.md for the reasoning behind each choice.
 export default defineConfig({

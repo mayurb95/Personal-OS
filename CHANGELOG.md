@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 (28 Sep 2026)
+
+- Phase 0 checks passed on the iPhone (iOS 18.1.1): installed, offline, protected storage, data kept between launches.
+- The version line in System check now shows the build's commit when deployed from Cloudflare Workers.
+- Setup notes updated for Cloudflare's Workers deployment.
+
 ## 0.1.0 — Phase 0 (28 Sep 2026)
 
 First installable version. It checks that the iPhone can run Personal OS; there are no features to use yet.
