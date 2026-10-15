@@ -87,7 +87,7 @@ export function WorkoutsScreen() {
         </button>
       </Section>
 
-      {stats && (
+      {stats && stats.weekly.some((w) => w.sessions > 0) && (
         <>
           <div className="mx-4 mb-3 grid grid-cols-3 gap-3">
             <Tile value={stats.thisWeek} label="This week" />
@@ -104,6 +104,7 @@ export function WorkoutsScreen() {
               }))}
               format={(v) => `${v} workout${v === 1 ? '' : 's'}`}
               labelEvery={2}
+              integer
               highlightLast
             />
           </Section>

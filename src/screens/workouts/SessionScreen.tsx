@@ -131,6 +131,7 @@ export function SessionScreen() {
         </ButtonRow>
       </Section>
 
+      {live && <div className="h-24" aria-hidden="true" />}
       {live && <RestBar />}
 
       <ExercisePicker
@@ -224,6 +225,12 @@ function Summary({ session }: { session: Session }) {
   )
 }
 
+/** With no history, an empty set borrows the values of the set above it. */
+function asPrevious(set: WorkoutSet | undefined): PreviousSet | undefined {
+  if (!set || (set.weightKg === null && set.reps === null && set.durationS === null && set.distanceM === null)) return undefined
+  return { weightKg: set.weightKg, reps: set.reps, durationS: set.durationS, distanceM: set.distanceM }
+}
+
 function columns(kind: SessionExercise['exercise']['kind']): string[] {
   switch (kind) {
     case 'weight':
@@ -298,9 +305,10 @@ function ExerciseBlock({
           index={i}
           kind={kind}
           grid={grid}
-          previous={item.previous[i] ?? item.previous.at(-1)}
+          previous={item.previous[i] ?? item.previous.at(-1) ?? asPrevious(item.sets[i - 1])}
           isPR={item.prSetIds.includes(set.id)}
           live={live}
+          fromHistory={item.previous.length > 0}
           restLabel={isLast && i === item.sets.length - 1 ? 'Rest' : `Rest · next: ${item.exercise.name}`}
         />
       ))}
@@ -324,6 +332,7 @@ function SetRow({
   isPR,
   live,
   restLabel,
+  fromHistory,
 }: {
   set: WorkoutSet
   index: number
@@ -333,6 +342,7 @@ function SetRow({
   isPR: boolean
   live: boolean
   restLabel: string
+  fromHistory: boolean
 }) {
   const save = (patch: Parameters<typeof act<'updateSet'>>[1]) => act('updateSet', patch)
   const num = (text: string) => {
@@ -393,7 +403,7 @@ function SetRow({
   return (
     <div className={`grid ${grid} items-center gap-2 px-3 py-1.5 ${set.done && live ? 'bg-good/10' : ''}`}>
       <span className="text-center text-[15px] font-semibold text-label-2">{isPR ? '🏆' : index + 1}</span>
-      <span className="truncate text-[13px] text-label-2">{prevText(kind, previous)}</span>
+      <span className="truncate text-[13px] text-label-2">{fromHistory ? prevText(kind, previous) : '—'}</span>
       {fields}
       {live ? (
         <button

@@ -369,10 +369,12 @@ function insertSet(
     restS?: number | null
   },
 ): void {
+  // Sets added to a finished workout count straight away; there's no tick column there.
+  const finished = db.selectValue('SELECT ended_at IS NOT NULL FROM workout_sessions WHERE id = ?', [p.sessionId])
   db.exec({
     sql: `INSERT INTO workout_sets (id, session_id, exercise_id, exercise_order, set_order, weight_kg, reps,
-            duration_s, distance_m, target_reps, rest_s, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            duration_s, distance_m, target_reps, rest_s, done, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     bind: [
       newId(),
       p.sessionId,
@@ -385,6 +387,7 @@ function insertSet(
       p.distanceM ?? null,
       p.targetReps ?? null,
       p.restS ?? defaultRest(db),
+      Number(finished) === 1 ? 1 : 0,
       nowISO(),
     ],
   })

@@ -53,17 +53,21 @@ export function BarChart({
   highlightLast = false,
   limit,
   ariaLabel,
+  integer = false,
 }: {
   data: Point[]
   format?: (v: number) => string
   labelEvery?: number
   highlightLast?: boolean
+  /** Counts: keep axis ticks on whole numbers. */
+  integer?: boolean
   /** Optional reference line, e.g. a budget. */
   limit?: number
   ariaLabel: string
 }) {
   const [active, setActive] = useState<number | null>(null)
-  const max = niceMax(Math.max(...data.map((d) => d.value), limit ?? 0))
+  const raw = Math.max(...data.map((d) => d.value), limit ?? 0)
+  const max = integer ? Math.max(2, Math.ceil(raw / 2) * 2) : niceMax(raw)
   const innerW = W - PAD.left - PAD.right
   const innerH = H - PAD.top - PAD.bottom
   const slot = innerW / Math.max(1, data.length)
