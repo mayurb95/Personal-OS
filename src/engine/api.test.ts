@@ -15,7 +15,7 @@ describe('api', () => {
   })
 
   it('writes are listed as mutations (by naming convention)', () => {
-    const writeVerbs = /^(create|update|delete|add|move|remove|trash|restore|purge|empty|quickAdd|set|log|tap)/
+    const writeVerbs = /^(create|update|delete|add|move|remove|trash|restore|purge|empty|quickAdd|set|log|tap|save|start|finish)/
     for (const name of Object.keys(api)) {
       if (writeVerbs.test(name)) expect(MUTATIONS.has(name), name).toBe(true)
     }

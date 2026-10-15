@@ -56,7 +56,7 @@ export interface Field {
   hidden: boolean
 }
 
-export type CollectionKind = 'custom' | 'tasks' | 'habits'
+export type CollectionKind = 'custom' | 'tasks' | 'habits' | 'expenses' | 'journal'
 
 export interface ViewSettings {
   layout: 'list' | 'table'

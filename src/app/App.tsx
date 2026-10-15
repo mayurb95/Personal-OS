@@ -16,6 +16,10 @@ import { TaskListScreen } from '../screens/tasks/TaskListScreen'
 import { TasksHome } from '../screens/tasks/TasksHome'
 import { TodayScreen } from '../screens/TodayScreen'
 import { TrashScreen } from '../screens/TrashScreen'
+import { BodyWeightScreen, ExerciseDetailScreen, ExercisesScreen, HistoryScreen } from '../screens/workouts/ExerciseScreens'
+import { RoutineEditScreen } from '../screens/workouts/RoutineEditScreen'
+import { SessionScreen } from '../screens/workouts/SessionScreen'
+import { WorkoutsScreen } from '../screens/workouts/WorkoutsScreen'
 import { TabBar } from '../ui/TabBar'
 import { Toaster } from '../ui/Toast'
 import { UpdateBanner } from './UpdateBanner'
@@ -47,6 +51,14 @@ export function App() {
             <Route path="/habits/new" element={<HabitEditScreen />} />
             <Route path="/habits/:id" element={<HabitDetailScreen />} />
             <Route path="/habits/:id/edit" element={<HabitEditScreen />} />
+            <Route path="/workouts" element={<WorkoutsScreen />} />
+            <Route path="/workouts/session/:id" element={<SessionScreen />} />
+            <Route path="/workouts/routines/new" element={<RoutineEditScreen />} />
+            <Route path="/workouts/routines/:id" element={<RoutineEditScreen />} />
+            <Route path="/workouts/exercises" element={<ExercisesScreen />} />
+            <Route path="/workouts/exercises/:id" element={<ExerciseDetailScreen />} />
+            <Route path="/workouts/history" element={<HistoryScreen />} />
+            <Route path="/workouts/body" element={<BodyWeightScreen />} />
             <Route path="/more" element={<MoreScreen />} />
             <Route path="/collections" element={<CollectionsScreen />} />
             <Route path="/collections/:id" element={<CollectionScreen />} />

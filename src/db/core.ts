@@ -5,6 +5,7 @@
  * app's Web Worker (database in OPFS) and in unit tests (in-memory database in Node).
  */
 import type { Database } from '@sqlite.org/sqlite-wasm'
+import { SEED_EXERCISES } from '../engine/seed'
 
 /**
  * Schema migrations, applied in order. Each entry runs once, inside a transaction,
@@ -110,6 +111,72 @@ export const MIGRATIONS: readonly string[] = [
      ('habits.schedule',    'habits', 'schedule',    'Schedule',   'json',        '{}', 4, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
      ('habits.part_of_day', 'habits', 'part_of_day', 'Time of day','text',        '{}', 5, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
      ('habits.archived',    'habits', 'archived',    'Archived',   'checkbox',    '{}', 6, 1, strftime('%Y-%m-%dT%H:%M:%fZ'));`,
+
+  // 4 — workouts: exercise library, routines, sessions with sets, body weight.
+  `CREATE TABLE exercises (
+     id          TEXT PRIMARY KEY,
+     name        TEXT NOT NULL,
+     kind        TEXT NOT NULL,
+     muscle      TEXT NOT NULL DEFAULT '',
+     equipment   TEXT NOT NULL DEFAULT '',
+     notes       TEXT NOT NULL DEFAULT '',
+     builtin     INTEGER NOT NULL DEFAULT 0,
+     archived_at TEXT,
+     created_at  TEXT NOT NULL
+   ) STRICT;
+
+   CREATE TABLE routines (
+     id          TEXT PRIMARY KEY,
+     name        TEXT NOT NULL,
+     notes       TEXT NOT NULL DEFAULT '',
+     weekdays    TEXT NOT NULL DEFAULT '[]' CHECK (json_valid(weekdays)),
+     items       TEXT NOT NULL DEFAULT '[]' CHECK (json_valid(items)),
+     sort        INTEGER NOT NULL DEFAULT 0,
+     archived_at TEXT,
+     created_at  TEXT NOT NULL,
+     updated_at  TEXT NOT NULL
+   ) STRICT;
+
+   CREATE TABLE workout_sessions (
+     id         TEXT PRIMARY KEY,
+     name       TEXT NOT NULL,
+     routine_id TEXT REFERENCES routines(id) ON DELETE SET NULL,
+     day        TEXT NOT NULL,
+     started_at TEXT NOT NULL,
+     ended_at   TEXT,
+     notes      TEXT NOT NULL DEFAULT ''
+   ) STRICT;
+   CREATE INDEX workout_sessions_by_day ON workout_sessions (day);
+
+   CREATE TABLE workout_sets (
+     id             TEXT PRIMARY KEY,
+     session_id     TEXT NOT NULL REFERENCES workout_sessions(id) ON DELETE CASCADE,
+     exercise_id    TEXT NOT NULL REFERENCES exercises(id),
+     exercise_order INTEGER NOT NULL,
+     set_order      INTEGER NOT NULL,
+     weight_kg      REAL,
+     reps           INTEGER,
+     duration_s     INTEGER,
+     distance_m     REAL,
+     target_reps    INTEGER,
+     rest_s         INTEGER NOT NULL DEFAULT 90,
+     done           INTEGER NOT NULL DEFAULT 0,
+     created_at     TEXT NOT NULL
+   ) STRICT;
+   CREATE INDEX workout_sets_by_session ON workout_sets (session_id, exercise_order, set_order);
+   CREATE INDEX workout_sets_by_exercise ON workout_sets (exercise_id);
+
+   CREATE TABLE body_weights (
+     day        TEXT PRIMARY KEY,
+     weight_kg  REAL NOT NULL,
+     updated_at TEXT NOT NULL
+   ) STRICT, WITHOUT ROWID;
+
+   INSERT INTO exercises (id, name, kind, muscle, equipment, builtin, created_at) VALUES
+   ${SEED_EXERCISES.map(
+     ([name, kind, muscle, equipment], i) =>
+       `('ex-${String(i + 1).padStart(3, '0')}', '${name.replace(/'/g, "''")}', '${kind}', '${muscle}', '${equipment}', 1, strftime('%Y-%m-%dT%H:%M:%fZ'))`,
+   ).join(',\n   ')};`,
 ]
 
 export function schemaVersion(db: Database): number {

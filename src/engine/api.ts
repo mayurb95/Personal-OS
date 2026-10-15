@@ -50,6 +50,34 @@ import {
   updateTask,
 } from './tasks'
 import { todaySummary } from './today'
+import {
+  activeSession,
+  addExerciseToSession,
+  addSet,
+  bodyWeights,
+  createExercise,
+  deleteRoutine,
+  deleteSession,
+  deleteSet,
+  exerciseProgress,
+  finishSession,
+  getExercise,
+  getRoutine,
+  getSession,
+  listExercises,
+  listRoutines,
+  listSessions,
+  logBodyWeight,
+  moveExerciseInSession,
+  plannedWorkouts,
+  removeExerciseFromSession,
+  saveRoutine,
+  startSession,
+  updateExercise,
+  updateSession,
+  updateSet,
+  workoutStats,
+} from './workouts'
 
 export const api = {
   // Collections and fields
@@ -94,6 +122,33 @@ export const api = {
   tapHabit,
   // Today
   todaySummary,
+  // Workouts
+  listExercises,
+  getExercise,
+  createExercise,
+  updateExercise,
+  listRoutines,
+  getRoutine,
+  saveRoutine,
+  deleteRoutine,
+  plannedWorkouts,
+  activeSession,
+  startSession,
+  getSession,
+  addExerciseToSession,
+  addSet,
+  updateSet,
+  deleteSet,
+  removeExerciseFromSession,
+  moveExerciseInSession,
+  updateSession,
+  finishSession,
+  deleteSession,
+  listSessions,
+  exerciseProgress,
+  workoutStats,
+  logBodyWeight,
+  bodyWeights,
 } satisfies Record<string, (db: Database, payload: never) => unknown>
 
 export type Api = typeof api

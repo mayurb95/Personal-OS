@@ -3,6 +3,7 @@
 ## 0.3.0 — Phase 2 (in progress)
 
 - **Backup** (More → Backup): saves everything in one file through the share sheet. Choose Save to Files → OneDrive. Restore replaces everything with a chosen backup after checking the file. Today reminds you when the last backup is over a week old.
+- **Workouts** tab: 53 starter exercises (weights, bodyweight, cardio, sport) plus your own. Routines with days of the week appear on Workouts when due. Live logging shows last time's numbers beside every set; tick a set to fill it and start the rest timer (with −15/+15/Skip and a beep). Weights go up automatically when you hit every target rep. Finishing shows time, sets, volume, distance and new records. Exercise pages show records, a progress chart and history. Also weekly charts, sets per muscle, workout history and a body weight log. Units are kg and km.
 
 ## 0.2.1 (28 Sep 2026)
 

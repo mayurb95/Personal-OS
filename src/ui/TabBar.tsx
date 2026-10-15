@@ -5,6 +5,7 @@ const tabs = [
   { to: '/', label: 'Today', icon: TodayIcon, end: true },
   { to: '/tasks', label: 'Tasks', icon: TasksIcon, end: false },
   { to: '/habits', label: 'Habits', icon: HabitsIcon, end: false },
+  { to: '/workouts', label: 'Workouts', icon: WorkoutsIcon, end: false },
   { to: '/more', label: 'More', icon: MoreIcon, end: false },
 ]
 
@@ -55,6 +56,14 @@ function TasksIcon() {
 
 function HabitsIcon() {
   return <Flame size={26} strokeWidth={1.7} />
+}
+
+function WorkoutsIcon() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M2.5 12h19M6 8v8M18 8v8M3.5 10v4M20.5 10v4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  )
 }
 
 function MoreIcon() {
