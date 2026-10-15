@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { act, useDbQuery, useToday } from '../app/data'
 import { formatDayWithWeekday } from '../engine/dates'
 import type { HabitStatus, PartOfDay } from '../engine/habits'
@@ -10,6 +10,9 @@ import { Screen } from '../ui/Screen'
 import { primeKeyboard } from '../ui/Sheet'
 import { showToast } from '../ui/Toast'
 import { HabitRow } from './habits/HabitRow'
+import { moodFace, MOODS } from './journal/JournalScreens'
+import { ExpenseSheet } from './money/ExpenseSheet'
+import { inr } from './money/format'
 import { QuickAddSheet } from './tasks/QuickAddSheet'
 import { TaskRow } from './tasks/TaskRow'
 
@@ -31,6 +34,12 @@ export function TodayScreen() {
   const today = useToday()
   const { data } = useDbQuery('todaySummary', { today })
   const backup = useDbQuery('backupStatus').data
+  const active = useDbQuery('activeSession').data
+  const planned = useDbQuery('plannedWorkouts', { today }).data ?? []
+  const spend = useDbQuery('spendingSnapshot', { today }).data
+  const journal = useDbQuery('journalDay', { day: today }).data
+  const navigate = useNavigate()
+  const [addingExpense, setAddingExpense] = useState(false)
   const [adding, setAdding] = useState(false)
   const [showDone, setShowDone] = useState(false)
 
@@ -76,6 +85,37 @@ export function TodayScreen() {
             <span className="font-semibold text-accent">Back up now</span>
           </span>
         </Link>
+      )}
+
+      {active ? (
+        <Link to={`/workouts/session/${active.id}`} className="mx-4 mb-6 flex items-center gap-3 rounded-[12px] bg-accent px-4 py-3 text-white active:opacity-80">
+          <div className="min-w-0 flex-1">
+            <div className="text-[13px] opacity-80">Workout in progress</div>
+            <div className="truncate font-semibold">{active.name}</div>
+          </div>
+          <span className="font-semibold">Resume</span>
+        </Link>
+      ) : (
+        planned
+          .filter((p) => !p.doneToday)
+          .map((p) => (
+            <div key={p.routine.id} className="mx-4 mb-6 flex items-center gap-3 rounded-[12px] bg-card px-4 py-3">
+              <div className="min-w-0 flex-1">
+                <div className="text-[13px] text-label-2">Planned workout</div>
+                <div className="truncate font-semibold">{p.routine.name}</div>
+              </div>
+              <button
+                type="button"
+                onClick={async () => {
+                  const s = await act('startSession', { today, routineId: p.routine.id })
+                  if (s) navigate(`/workouts/session/${s.id}`)
+                }}
+                className="rounded-full bg-accent px-3.5 py-1.5 text-[15px] font-semibold text-white"
+              >
+                Start
+              </button>
+            </div>
+          ))
       )}
 
       {nothing && (
@@ -131,6 +171,60 @@ export function TodayScreen() {
           )}
         </Section>
       )}
+
+      <Section title="Money">
+        <div className="flex items-center gap-3 px-4 py-3">
+          <Link to="/money" className="min-w-0 flex-1">
+            <div className="text-[20px] font-semibold tabular-nums">{spend ? inr(spend.today) : '…'}</div>
+            <div className="text-[13px] text-label-2">
+              spent today{spend ? ` · ${inr(spend.month)} this month${spend.budget ? ` of ${inr(spend.budget)}` : ''}` : ''}
+            </div>
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              primeKeyboard()
+              setAddingExpense(true)
+            }}
+            className="rounded-full bg-accent/15 px-3.5 py-1.5 text-[15px] font-semibold text-accent"
+          >
+            + Expense
+          </button>
+        </div>
+      </Section>
+
+      <Section title="Journal">
+        {journal?.entry ? (
+          <Link to="/journal" className="flex items-center gap-3 px-4 py-3 active:bg-card-pressed">
+            <span className="text-[28px]">{moodFace(journal.entry.mood)}</span>
+            <span className="line-clamp-2 min-w-0 flex-1 text-[15px] text-label-2">
+              {journal.entry.text || journal.entry.emotions.join(', ') || 'Mood logged'}
+            </span>
+          </Link>
+        ) : (
+          <div className="px-4 py-3">
+            <div className="mb-2 text-[15px]">How’s today going?</div>
+            <div className="flex justify-between">
+              {MOODS.map((m) => (
+                <button
+                  key={m.value}
+                  type="button"
+                  aria-label={m.label}
+                  onClick={() => void act('saveEntry', { day: today, mood: m.value, prompt: journal?.prompt })}
+                  className="text-[30px] leading-none active:scale-110"
+                >
+                  {m.face}
+                </button>
+              ))}
+            </div>
+            <Link to="/journal" className="mt-2 block text-[13px] text-accent">
+              Write in your journal
+            </Link>
+          </div>
+        )}
+      </Section>
+
+      <ExpenseSheet open={addingExpense} onClose={() => setAddingExpense(false)} />
 
       <FloatingAdd
         label="New task"

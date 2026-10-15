@@ -24,7 +24,11 @@ Outside (later phases): OneDrive (backups, vault mirror, Reminders bridge files)
 | `src/db/` | Database plumbing: `core.ts` (migrations, launch counter), `worker.ts` (owns the connection), `client.ts` (UI-side handle and change notifications), `protocol.ts` (message types), `mutations.ts` (calls that change data) |
 | `src/engine/` | The engine, plain functions over a `Database`: `collections.ts`, `records.ts` (CRUD, trash, search), `tasks.ts`, `quickadd.ts`, `recurrence.ts`, `habits.ts`, `today.ts`, `dates.ts`; `api.ts` lists every call the UI can make |
 | `src/app/data.ts` | `useDbQuery` (auto-refreshing reads), `act` (writes with error toasts), `useToday` |
-| `src/screens/<area>/` | Screens by area: `tasks/`, `habits/`, `collections/` |
+| `src/screens/<area>/` | Screens by area: `tasks/`, `habits/`, `collections/`, `workouts/`, `money/`, `journal/` |
+| `src/engine/workouts.ts`, `expenses.ts`, `csv.ts`, `journal.ts` | Phase 2 modules; `seed.ts` is the frozen starter exercise list |
+| `src/db/backup.ts` | Whole-database export, inspection and restore |
+| `src/ui/Charts.tsx` | Dependency-free SVG bar and line charts, and the budget meter |
+| `src/lib/share.ts` | Saving files through the iOS share sheet |
 | `src/lib/` | Browser helpers with no UI |
 | `public/` | Static files copied as-is: icons, `_headers` for Cloudflare |
 | `scripts/` | One-off tools, e.g. icon generation |
@@ -41,7 +45,15 @@ Later phases add `src/vault/` (Markdown notes), `src/sync/` (OneDrive) and more 
 | `records` | Every item: `title`, `data` (JSON keyed by field key), `body` (notes), timestamps, `deleted_at` for the trash |
 | `records_fts` | FTS5 index over title and body, kept in sync by triggers |
 | `habit_logs` | One row per habit per day: value, skipped (rest day) |
+| `exercises`, `routines` | Exercise library (kind: weight, reps, time, distance) and planned workouts with weekdays and per-exercise targets (JSON) |
+| `workout_sessions`, `workout_sets` | Each workout and its sets; unfinished sessions have no `ended_at` (only one at a time) |
+| `body_weights` | One weight per day |
+| `recurring_expenses` | Rent, subscriptions and the like, with the next due date |
 | `app_meta` | Key/value facts such as the launch counter |
+
+Expenses (`expenses`) and journal entries (`journal`, one per day by a unique index) are records too, so they're searchable and use the trash. Expense amounts are always stored in INR; a foreign-currency entry also keeps its original amount, currency and rate. Monthly budgets live in the Expenses collection's `settings.budgets`.
+
+Workouts use their own tables rather than records: a session has dozens of sets that are read and compared constantly (previous values, records, weekly volume), which plain SQL tables do far better than JSON.
 
 Tasks and habits are records in their built-in collections, so later features (custom fields, views, search) work on them too. Habit check-ins live in their own table because streaks read hundreds of days at once.
 
@@ -75,6 +87,13 @@ Tasks and habits are records in their built-in collections, so later features (c
 | Date | Device | Result |
 | --- | --- | --- |
 | 28 Sep 2026 | iPhone, iOS 18.1.1 | Installed, offline ready, protected storage granted, SQLite in OPFS opened in 49 ms, data survived restarts; 1,000-record write 48 ms, summary 12 ms, search 1 ms |
+
+## Phase 2 notes
+
+- **Backup**: `sqlite3_js_db_export` gives the whole database as bytes; restore checks the file in memory (tables, schema version, `quick_check`) before `importDb` replaces the OPFS file, and puts the old bytes back if loading fails. iOS only opens the share sheet from a tap, so saving is two taps: prepare, then save.
+- **Rest timer** counts down to a timestamp (survives backgrounding) and schedules its beep with Web Audio at the moment the set is ticked, since iOS only allows sound started from a tap.
+- **Statement import** runs the CSV parsing in the page (pure functions in `csv.ts`) and the category guessing and duplicate check in the worker (`previewImport`).
+- **Recurring expenses** are posted at startup and when Money opens.
 
 ## Known workarounds
 
