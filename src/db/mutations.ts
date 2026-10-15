@@ -4,7 +4,9 @@
  */
 import type { ApiName } from '../engine/api'
 
-export const MUTATIONS: ReadonlySet<string> = new Set<ApiName>([
+export const MUTATIONS: ReadonlySet<string> = new Set<ApiName | 'markBackedUp' | 'restoreBackup'>([
+  'markBackedUp',
+  'restoreBackup',
   'createCollection',
   'updateCollection',
   'deleteCollection',

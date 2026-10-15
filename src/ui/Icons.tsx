@@ -137,6 +137,12 @@ export const ListIcon = (p: IconProps) => (
     <circle cx="4.8" cy="17.5" r="1.1" fill="currentColor" stroke="none" />
   </Svg>
 )
+export const CloudUp = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M7 18.5h10.5a4 4 0 00.6-7.95A5.5 5.5 0 007.4 9.1 4.7 4.7 0 007 18.5z" />
+    <path d="M12 16v-5.5M9.5 12.5L12 10l2.5 2.5" />
+  </Svg>
+)
 export const Flame = (p: IconProps) => (
   <Svg {...p}>
     <path d="M12 21c-3.6 0-6-2.4-6-5.6 0-3.3 2.6-5 3.4-8.4 2 1.3 2.6 3.4 2.6 3.4S14 8 13.6 3c3.3 2.2 4.4 6.4 4.4 9.6 0 5-2.4 8.4-6 8.4z" />

@@ -7,9 +7,10 @@
  * already open in another tab), it falls back to a temporary in-memory database and
  * reports why, so the app can warn instead of silently losing data.
  */
-import sqlite3InitModule, { type Database } from '@sqlite.org/sqlite-wasm'
+import sqlite3InitModule, { type Database, type SAHPoolUtil, type Sqlite3Static } from '@sqlite.org/sqlite-wasm'
 import { api, type ApiName } from '../engine/api'
 import { emptyTrash } from '../engine/records'
+import { backupFileName, exportBytes, inspectBackup, lastBackup, markBackedUp, openBytes, summarise } from './backup'
 import { getFeatures, migrate, recordLaunch, runBenchmark } from './core'
 import type { DbRequest, DbResponse, InitResult, StorageMode, SystemCalls } from './protocol'
 
@@ -23,6 +24,8 @@ const DB_FILE = '/personal-os.sqlite3'
 
 let initPromise: Promise<InitResult> | null = null
 let db: Database | null = null
+let sqlite3: Sqlite3Static | null = null
+let pool: SAHPoolUtil | null = null
 
 function describe(error: unknown): string {
   return error instanceof Error ? `${error.name}: ${error.message}` : String(error)
@@ -30,11 +33,11 @@ function describe(error: unknown): string {
 
 async function init(): Promise<InitResult> {
   const started = performance.now()
-  const sqlite3 = await sqlite3InitModule()
+  sqlite3 = await sqlite3InitModule()
   let storage: StorageMode = 'opfs'
   let storageError: string | null = null
   try {
-    const pool = await sqlite3.installOpfsSAHPoolVfs({
+    pool = await sqlite3.installOpfsSAHPoolVfs({
       name: 'personal-os',
       directory: '/personal-os-db',
       initialCapacity: 6,
@@ -45,8 +48,7 @@ async function init(): Promise<InitResult> {
     storageError = describe(error)
     db = new sqlite3.oo1.DB(':memory:')
   }
-  db.exec('PRAGMA foreign_keys = ON;')
-  migrate(db)
+  prepare(db)
   // Housekeeping: items in the trash for more than 30 days are deleted for good.
   try {
     emptyTrash(db, { olderThanDays: 30 })
@@ -59,6 +61,38 @@ async function init(): Promise<InitResult> {
     features: getFeatures(db),
     initMs: Math.round(performance.now() - started),
   }
+}
+
+function prepare(database: Database): void {
+  database.exec('PRAGMA foreign_keys = ON;')
+  migrate(database)
+}
+
+/**
+ * Replaces the whole database with a backup. The backup is checked first, and if putting
+ * it in place fails, the previous data is put back.
+ */
+async function restore(bytes: Uint8Array) {
+  await ensureInit()
+  const summary = inspectBackup(sqlite3!, bytes)
+  const previous = exportBytes(sqlite3!, db!)
+  const load = async (data: Uint8Array) => {
+    db?.close()
+    if (pool) {
+      await pool.importDb(DB_FILE, data)
+      db = new pool.OpfsSAHPoolDb(DB_FILE)
+    } else {
+      db = openBytes(sqlite3!, data)
+    }
+    prepare(db)
+  }
+  try {
+    await load(bytes)
+  } catch (error) {
+    await load(previous)
+    throw error
+  }
+  return { ...summary, schemaVersion: summarise(db!).schemaVersion }
 }
 
 function ensureInit(): Promise<InitResult> {
@@ -80,6 +114,24 @@ const system: { [K in keyof SystemCalls]: SystemHandler<K> } = {
     await ensureInit()
     return runBenchmark(db!, rows)
   },
+  backupStatus: async () => {
+    await ensureInit()
+    return { last: lastBackup(db!), summary: summarise(db!) }
+  },
+  exportBackup: async () => {
+    await ensureInit()
+    return { bytes: exportBytes(sqlite3!, db!), fileName: backupFileName(), summary: summarise(db!) }
+  },
+  markBackedUp: async () => {
+    await ensureInit()
+    markBackedUp(db!)
+    return { last: lastBackup(db!)! }
+  },
+  inspectBackup: async ({ bytes }) => {
+    await ensureInit()
+    return inspectBackup(sqlite3!, bytes)
+  },
+  restoreBackup: async ({ bytes }) => restore(bytes),
 }
 
 async function handle(call: string, payload: unknown): Promise<unknown> {

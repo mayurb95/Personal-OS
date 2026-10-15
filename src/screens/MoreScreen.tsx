@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 import { useDbQuery } from '../app/data'
-import { Grid, SearchIcon, Shield, Trash } from '../ui/Icons'
+import { CloudUp, Grid, SearchIcon, Shield, Trash } from '../ui/Icons'
 import { Row, Section } from '../ui/List'
 import { Screen } from '../ui/Screen'
 
@@ -23,6 +23,7 @@ function Item({ to, icon, label, value }: { to: string; icon: React.ReactNode; l
 export function MoreScreen() {
   const collections = useDbQuery('listCollections').data
   const trash = useDbQuery('listTrash').data
+  const backup = useDbQuery('backupStatus').data
 
   return (
     <Screen title="More">
@@ -48,6 +49,12 @@ export function MoreScreen() {
         </Section>
       )}
       <Section>
+        <Item
+          to="/backup"
+          icon={<CloudUp size={20} />}
+          label="Backup"
+          value={backup ? (backup.last ? new Date(backup.last).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'Never') : ''}
+        />
         <Item to="/trash" icon={<Trash size={20} />} label="Trash" value={trash?.length || ''} />
         <Item to="/system" icon={<Shield size={20} />} label="System check" />
       </Section>

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.0 — Phase 2 (in progress)
+
+- **Backup** (More → Backup): saves everything in one file through the share sheet. Choose Save to Files → OneDrive. Restore replaces everything with a chosen backup after checking the file. Today reminds you when the last backup is over a week old.
+
 ## 0.2.1 (28 Sep 2026)
 
 Fixes from a test run in a phone-sized browser:

@@ -3,6 +3,7 @@
  * Every request carries an id; the worker answers with the same id.
  */
 import type { Api } from '../engine/api'
+import type { BackupSummary } from './backup'
 import type { BenchmarkResult, DbFeatures, LaunchInfo } from './core'
 
 export type StorageMode = 'opfs' | 'memory'
@@ -20,6 +21,11 @@ export interface SystemCalls {
   init: [undefined, InitResult]
   recordLaunch: [undefined, LaunchInfo]
   benchmark: [{ rows: number }, BenchmarkResult]
+  backupStatus: [undefined, { last: string | null; summary: BackupSummary }]
+  exportBackup: [undefined, { bytes: Uint8Array; fileName: string; summary: BackupSummary }]
+  markBackedUp: [undefined, { last: string }]
+  inspectBackup: [{ bytes: Uint8Array }, BackupSummary]
+  restoreBackup: [{ bytes: Uint8Array }, BackupSummary]
 }
 
 type ApiCalls = {

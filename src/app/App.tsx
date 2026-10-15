@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router'
+import { BackupScreen } from '../screens/BackupScreen'
 import { CollectionScreen } from '../screens/collections/CollectionScreen'
 import { CollectionsScreen } from '../screens/collections/CollectionsScreen'
 import { FieldsScreen } from '../screens/collections/FieldsScreen'
@@ -53,6 +54,7 @@ export function App() {
             <Route path="/records/:id" element={<RecordScreen />} />
             <Route path="/search" element={<SearchScreen />} />
             <Route path="/trash" element={<TrashScreen />} />
+            <Route path="/backup" element={<BackupScreen />} />
             <Route path="/system" element={<SystemCheckScreen />} />
             <Route path="*" element={<TodayScreen />} />
           </Routes>

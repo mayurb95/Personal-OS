@@ -10,7 +10,8 @@ const TODAY = '2026-09-28'
 
 describe('api', () => {
   it('every mutation is a real call', () => {
-    for (const name of MUTATIONS) expect(api).toHaveProperty(name)
+    const system = new Set(['markBackedUp', 'restoreBackup'])
+    for (const name of MUTATIONS) if (!system.has(name)) expect(api).toHaveProperty(name)
   })
 
   it('writes are listed as mutations (by naming convention)', () => {

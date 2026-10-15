@@ -4,8 +4,13 @@ import { migrate } from '../db/core'
 
 let sqlite3: Sqlite3Static | null = null
 
-export async function freshDb(): Promise<Database> {
+export async function getSqlite3(): Promise<Sqlite3Static> {
   sqlite3 ??= await sqlite3InitModule()
+  return sqlite3
+}
+
+export async function freshDb(): Promise<Database> {
+  sqlite3 = await getSqlite3()
   const db = new sqlite3.oo1.DB(':memory:')
   db.exec('PRAGMA foreign_keys = ON;')
   migrate(db)

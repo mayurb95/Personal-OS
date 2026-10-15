@@ -4,7 +4,7 @@ import { act, useDbQuery, useToday } from '../app/data'
 import { formatDayWithWeekday } from '../engine/dates'
 import type { HabitStatus, PartOfDay } from '../engine/habits'
 import { EmptyState, FloatingAdd } from '../ui/Controls'
-import { SearchIcon } from '../ui/Icons'
+import { CloudUp, SearchIcon } from '../ui/Icons'
 import { Section } from '../ui/List'
 import { Screen } from '../ui/Screen'
 import { primeKeyboard } from '../ui/Sheet'
@@ -30,6 +30,7 @@ const PARTS: { key: PartOfDay; title: string }[] = [
 export function TodayScreen() {
   const today = useToday()
   const { data } = useDbQuery('todaySummary', { today })
+  const backup = useDbQuery('backupStatus').data
   const [adding, setAdding] = useState(false)
   const [showDone, setShowDone] = useState(false)
 
@@ -65,6 +66,16 @@ export function TodayScreen() {
             .filter(Boolean)
             .join(' · ')}
         </p>
+      )}
+
+      {backup && backup.summary.records > 0 && (!backup.last || Date.now() - new Date(backup.last).getTime() > 7 * 86_400_000) && (
+        <Link to="/backup" className="mx-4 mb-6 flex items-center gap-3 rounded-[12px] bg-warn/15 px-4 py-3 active:opacity-70">
+          <CloudUp size={22} className="shrink-0 text-warn" />
+          <span className="text-[15px] leading-snug">
+            {backup.last ? 'Your last backup was over a week ago.' : 'You haven’t backed up yet.'}{' '}
+            <span className="font-semibold text-accent">Back up now</span>
+          </span>
+        </Link>
       )}
 
       {nothing && (
