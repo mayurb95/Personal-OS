@@ -31,7 +31,7 @@ function compact(n: number): string {
   return String(Math.round(n * 10) / 10)
 }
 
-function Readout({ point, format }: { point: Point | undefined; format: (v: number) => string }) {
+function Readout({ point, format, hint = 'Tap a point for its value' }: { point: Point | undefined; format: (v: number) => string; hint?: string }) {
   return (
     <div className="h-5 px-1 text-[13px] text-label-2" aria-live="polite">
       {point ? (
@@ -39,7 +39,7 @@ function Readout({ point, format }: { point: Point | undefined; format: (v: numb
           <span className="font-semibold text-label">{format(point.value)}</span> · {point.detail ?? point.label}
         </>
       ) : (
-        'Tap a point for its value'
+        hint
       )}
     </div>
   )
@@ -75,7 +75,7 @@ export function BarChart({
   const y = (v: number) => PAD.top + innerH - (v / max) * innerH
   return (
     <figure className="px-3 pb-2 pt-3">
-      <Readout point={active === null ? undefined : data[active]} format={format} />
+      <Readout point={active === null ? undefined : data[active]} format={format} hint="Tap a bar for its value" />
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={ariaLabel}>
         {[0, 0.5, 1].map((f) => (
           <g key={f}>
