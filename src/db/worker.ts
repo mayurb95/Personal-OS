@@ -9,6 +9,8 @@
  */
 import sqlite3InitModule, { type Database, type SAHPoolUtil, type Sqlite3Static } from '@sqlite.org/sqlite-wasm'
 import { api, type ApiName } from '../engine/api'
+import { localDate } from '../engine/dates'
+import { postDueRecurring } from '../engine/expenses'
 import { emptyTrash } from '../engine/records'
 import { backupFileName, exportBytes, inspectBackup, lastBackup, markBackedUp, openBytes, summarise } from './backup'
 import { getFeatures, migrate, recordLaunch, runBenchmark } from './core'
@@ -52,6 +54,7 @@ async function init(): Promise<InitResult> {
   // Housekeeping: items in the trash for more than 30 days are deleted for good.
   try {
     emptyTrash(db, { olderThanDays: 30 })
+    postDueRecurring(db, { today: localDate() })
   } catch {
     // Never block startup on housekeeping.
   }

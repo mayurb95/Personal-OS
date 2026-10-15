@@ -4,6 +4,7 @@ import { useDbQuery } from '../app/data'
 import { db } from '../db/client'
 import type { BackupSummary } from '../db/backup'
 import { formatBytes } from '../lib/environment'
+import { saveFile } from '../lib/share'
 import { ButtonRow, Row, Section } from '../ui/List'
 import { NavBar } from '../ui/NavBar'
 import { Page } from '../ui/Screen'
@@ -58,20 +59,10 @@ export function BackupScreen() {
   // Must run straight from the tap: iOS only opens the share sheet during a user gesture.
   const save = () => {
     if (!file) return
-    if (navigator.canShare?.({ files: [file] })) {
-      navigator.share({ files: [file], title: file.name }).then(done, (error: unknown) => {
-        if (error instanceof Error && error.name === 'AbortError') return
-        showToast('Couldn’t open the share sheet. Try again.', 'error')
-      })
-      return
-    }
-    const url = URL.createObjectURL(file)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = file.name
-    a.click()
-    window.setTimeout(() => URL.revokeObjectURL(url), 10_000)
-    void done()
+    saveFile(file).then(
+      (saved) => saved && void done(),
+      (error: unknown) => showToast(error instanceof Error ? error.message : String(error), 'error'),
+    )
   }
 
   const pick = async (f: File | undefined) => {

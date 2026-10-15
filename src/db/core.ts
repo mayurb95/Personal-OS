@@ -177,6 +177,40 @@ export const MIGRATIONS: readonly string[] = [
      ([name, kind, muscle, equipment], i) =>
        `('ex-${String(i + 1).padStart(3, '0')}', '${name.replace(/'/g, "''")}', '${kind}', '${muscle}', '${equipment}', 1, strftime('%Y-%m-%dT%H:%M:%fZ'))`,
    ).join(',\n   ')};`,
+
+  // 5 — money: built-in Expenses collection (amounts in INR, original currency kept),
+  //     recurring expenses. Budgets live in the collection's settings.
+  `INSERT INTO collections (id, kind, name, icon, sort, settings, created_at, updated_at) VALUES
+     ('expenses', 'expenses', 'Expenses', '💸', -3, '{"budgets":{}}', strftime('%Y-%m-%dT%H:%M:%fZ'), strftime('%Y-%m-%dT%H:%M:%fZ'));
+
+   INSERT INTO fields (id, collection_id, key, name, type, options, sort, builtin, created_at) VALUES
+     ('expenses.amount',   'expenses', 'amount',   'Amount (₹)', 'currency', '{"currency":"INR"}', 1, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('expenses.date',     'expenses', 'date',     'Date',       'date',     '{}', 2, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('expenses.category', 'expenses', 'category', 'Category',   'select',   '{"choices": [{"id": "cat-1", "label": "Food & dining"}, {"id": "cat-2", "label": "Groceries"}, {"id": "cat-3", "label": "Transport"}, {"id": "cat-4", "label": "Fuel"}, {"id": "cat-5", "label": "Bills & utilities"}, {"id": "cat-6", "label": "Rent"}, {"id": "cat-7", "label": "Shopping"}, {"id": "cat-8", "label": "Travel"}, {"id": "cat-9", "label": "Health"}, {"id": "cat-10", "label": "Entertainment"}, {"id": "cat-11", "label": "Subscriptions"}, {"id": "cat-12", "label": "Education"}, {"id": "cat-13", "label": "Personal care"}, {"id": "cat-14", "label": "Gifts & donations"}, {"id": "cat-15", "label": "Fees & charges"}, {"id": "cat-16", "label": "Other"}, {"id": "cat-17", "label": "Salary"}, {"id": "cat-18", "label": "Refund"}, {"id": "cat-19", "label": "Interest"}, {"id": "cat-20", "label": "Other income"}]}', 3, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('expenses.method',   'expenses', 'method',   'Paid with',  'select',   '{"choices": [{"id": "pay-1", "label": "UPI"}, {"id": "pay-2", "label": "SBI Aurum card"}, {"id": "pay-3", "label": "HDFC Diners card"}, {"id": "pay-4", "label": "Debit card"}, {"id": "pay-5", "label": "Cash"}, {"id": "pay-6", "label": "Bank transfer"}]}', 4, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('expenses.type',     'expenses', 'type',     'Type',       'text',     '{}', 5, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('expenses.currency', 'expenses', 'currency', 'Currency',   'text',     '{}', 6, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('expenses.original_amount', 'expenses', 'original_amount', 'Amount in currency', 'number', '{}', 7, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('expenses.rate',     'expenses', 'rate',     'Exchange rate', 'number', '{}', 8, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('expenses.recurring_id', 'expenses', 'recurring_id', 'Recurring', 'text', '{}', 9, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('expenses.import_key', 'expenses', 'import_key', 'Import key', 'text', '{}', 10, 1, strftime('%Y-%m-%dT%H:%M:%fZ'));
+
+   CREATE INDEX records_expense_date ON records (json_extract(data, '$.date'))
+     WHERE collection_id = 'expenses';
+
+   CREATE TABLE recurring_expenses (
+     id         TEXT PRIMARY KEY,
+     title      TEXT NOT NULL,
+     amount     REAL NOT NULL,
+     category   TEXT NOT NULL DEFAULT '',
+     method     TEXT NOT NULL DEFAULT '',
+     freq       TEXT NOT NULL DEFAULT 'month',
+     interval   INTEGER NOT NULL DEFAULT 1,
+     next_date  TEXT NOT NULL,
+     day_of_month INTEGER,
+     active     INTEGER NOT NULL DEFAULT 1,
+     created_at TEXT NOT NULL
+   ) STRICT;`,
 ]
 
 export function schemaVersion(db: Database): number {

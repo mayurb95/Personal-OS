@@ -43,4 +43,12 @@ export const MUTATIONS: ReadonlySet<string> = new Set<ApiName | 'markBackedUp' |
   'finishSession',
   'deleteSession',
   'logBodyWeight',
+  'addExpense',
+  'updateExpense',
+  'setBudget',
+  'setMoneyChoices',
+  'saveRecurring',
+  'deleteRecurring',
+  'postDueRecurring',
+  'importExpenses',
 ])

@@ -49,6 +49,24 @@ import {
   taskCounts,
   updateTask,
 } from './tasks'
+import {
+  addExpense,
+  deleteRecurring,
+  exportExpensesCSV,
+  getExpense,
+  importExpenses,
+  listExpenses,
+  listRecurring,
+  moneySettings,
+  moneySummary,
+  postDueRecurring,
+  previewImport,
+  saveRecurring,
+  setBudget,
+  setMoneyChoices,
+  spendingSnapshot,
+  updateExpense,
+} from './expenses'
 import { todaySummary } from './today'
 import {
   activeSession,
@@ -149,6 +167,23 @@ export const api = {
   workoutStats,
   logBodyWeight,
   bodyWeights,
+  // Money
+  addExpense,
+  updateExpense,
+  getExpense,
+  listExpenses,
+  moneySummary,
+  spendingSnapshot,
+  moneySettings,
+  setBudget,
+  setMoneyChoices,
+  listRecurring,
+  saveRecurring,
+  deleteRecurring,
+  postDueRecurring,
+  previewImport,
+  importExpenses,
+  exportExpensesCSV,
 } satisfies Record<string, (db: Database, payload: never) => unknown>
 
 export type Api = typeof api

@@ -38,7 +38,7 @@ describe('built-in collections', () => {
     expect(tasks.fields.map((f) => f.key)).toContain('due')
     expect(getCollection(db, { id: 'habits' })!.kind).toBe('habits')
     expect(listCollections(db)).toEqual([])
-    expect(listCollections(db, { includeBuiltin: true }).map((c) => c.id)).toEqual(['tasks', 'habits'])
+    expect(listCollections(db, { includeBuiltin: true }).map((c) => c.id)).toEqual(['expenses', 'tasks', 'habits'])
   })
 })
 

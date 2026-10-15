@@ -8,6 +8,9 @@ import { RecordScreen } from '../screens/collections/RecordScreen'
 import { HabitDetailScreen } from '../screens/habits/HabitDetailScreen'
 import { HabitEditScreen } from '../screens/habits/HabitEditScreen'
 import { HabitsScreen } from '../screens/habits/HabitsScreen'
+import { ImportScreen, RecurringScreen } from '../screens/money/ImportScreen'
+import { MoneyScreen } from '../screens/money/MoneyScreen'
+import { MoneySettingsScreen } from '../screens/money/MoneySettingsScreen'
 import { MoreScreen } from '../screens/MoreScreen'
 import { SearchScreen } from '../screens/SearchScreen'
 import { SystemCheckScreen } from '../screens/SystemCheckScreen'
@@ -59,6 +62,10 @@ export function App() {
             <Route path="/workouts/exercises/:id" element={<ExerciseDetailScreen />} />
             <Route path="/workouts/history" element={<HistoryScreen />} />
             <Route path="/workouts/body" element={<BodyWeightScreen />} />
+            <Route path="/money" element={<MoneyScreen />} />
+            <Route path="/money/settings" element={<MoneySettingsScreen />} />
+            <Route path="/money/import" element={<ImportScreen />} />
+            <Route path="/money/recurring" element={<RecurringScreen />} />
             <Route path="/more" element={<MoreScreen />} />
             <Route path="/collections" element={<CollectionsScreen />} />
             <Route path="/collections/:id" element={<CollectionScreen />} />

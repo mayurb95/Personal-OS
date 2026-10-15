@@ -65,6 +65,8 @@ export interface ViewSettings {
 
 export interface CollectionSettings {
   view?: ViewSettings
+  /** Expenses only: monthly budget per category; '__total' for all spending. */
+  budgets?: Record<string, number>
 }
 
 export interface Collection {

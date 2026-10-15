@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
-import { useDbQuery } from '../app/data'
+import { useDbQuery, useToday } from '../app/data'
+import { inr } from './money/format'
 import { CloudUp, Grid, SearchIcon, Shield, Trash } from '../ui/Icons'
 import { Row, Section } from '../ui/List'
 import { Screen } from '../ui/Screen'
@@ -24,9 +25,15 @@ export function MoreScreen() {
   const collections = useDbQuery('listCollections').data
   const trash = useDbQuery('listTrash').data
   const backup = useDbQuery('backupStatus').data
+  const today = useToday()
+  const money = useDbQuery('spendingSnapshot', { today }).data
 
   return (
     <Screen title="More">
+      <Section>
+        <Item to="/money" icon={<span className="text-[18px]">₹</span>} label="Money" value={money ? inr(money.month) : ''} />
+        <Item to="/journal" icon={<span className="text-[18px]">📓</span>} label="Journal" />
+      </Section>
       <Section>
         <Item to="/collections" icon={<Grid size={20} />} label="Collections" value={collections?.length || ''} />
         <Item to="/search" icon={<SearchIcon size={20} />} label="Search" />
