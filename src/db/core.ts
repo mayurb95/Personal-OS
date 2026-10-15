@@ -211,6 +211,20 @@ export const MIGRATIONS: readonly string[] = [
      active     INTEGER NOT NULL DEFAULT 1,
      created_at TEXT NOT NULL
    ) STRICT;`,
+
+  // 6 — journal: one entry per day with mood, energy and emotions.
+  `INSERT INTO collections (id, kind, name, icon, sort, created_at, updated_at) VALUES
+     ('journal', 'journal', 'Journal', '📓', -4, strftime('%Y-%m-%dT%H:%M:%fZ'), strftime('%Y-%m-%dT%H:%M:%fZ'));
+
+   INSERT INTO fields (id, collection_id, key, name, type, options, sort, builtin, created_at) VALUES
+     ('journal.day',      'journal', 'day',      'Day',      'date',        '{}', 1, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('journal.mood',     'journal', 'mood',     'Mood',     'rating',      '{"max":5}', 2, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('journal.energy',   'journal', 'energy',   'Energy',   'rating',      '{"max":5}', 3, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('journal.emotions', 'journal', 'emotions', 'Feelings', 'multiselect', '{"choices": [{"id": "emo-1", "label": "Happy"}, {"id": "emo-2", "label": "Calm"}, {"id": "emo-3", "label": "Grateful"}, {"id": "emo-4", "label": "Excited"}, {"id": "emo-5", "label": "Proud"}, {"id": "emo-6", "label": "Focused"}, {"id": "emo-7", "label": "Tired"}, {"id": "emo-8", "label": "Stressed"}, {"id": "emo-9", "label": "Anxious"}, {"id": "emo-10", "label": "Sad"}, {"id": "emo-11", "label": "Frustrated"}, {"id": "emo-12", "label": "Lonely"}]}', 4, 1, strftime('%Y-%m-%dT%H:%M:%fZ')),
+     ('journal.prompt',   'journal', 'prompt',   'Prompt',   'text',        '{}', 5, 1, strftime('%Y-%m-%dT%H:%M:%fZ'));
+
+   CREATE UNIQUE INDEX journal_one_per_day ON records (json_extract(data, '$.day'))
+     WHERE collection_id = 'journal' AND deleted_at IS NULL;`,
 ]
 
 export function schemaVersion(db: Database): number {

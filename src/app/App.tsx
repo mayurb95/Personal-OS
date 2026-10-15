@@ -11,6 +11,7 @@ import { HabitsScreen } from '../screens/habits/HabitsScreen'
 import { ImportScreen, RecurringScreen } from '../screens/money/ImportScreen'
 import { MoneyScreen } from '../screens/money/MoneyScreen'
 import { MoneySettingsScreen } from '../screens/money/MoneySettingsScreen'
+import { JournalDayScreen, JournalScreen, JournalSettingsScreen } from '../screens/journal/JournalScreens'
 import { MoreScreen } from '../screens/MoreScreen'
 import { SearchScreen } from '../screens/SearchScreen'
 import { SystemCheckScreen } from '../screens/SystemCheckScreen'
@@ -66,6 +67,9 @@ export function App() {
             <Route path="/money/settings" element={<MoneySettingsScreen />} />
             <Route path="/money/import" element={<ImportScreen />} />
             <Route path="/money/recurring" element={<RecurringScreen />} />
+            <Route path="/journal" element={<JournalScreen />} />
+            <Route path="/journal/settings" element={<JournalSettingsScreen />} />
+            <Route path="/journal/:day" element={<JournalDayScreen />} />
             <Route path="/more" element={<MoreScreen />} />
             <Route path="/collections" element={<CollectionsScreen />} />
             <Route path="/collections/:id" element={<CollectionScreen />} />

@@ -67,6 +67,17 @@ import {
   spendingSnapshot,
   updateExpense,
 } from './expenses'
+import {
+  emotionChoices,
+  journalDay,
+  journalPrompts,
+  journalStats,
+  listEntries,
+  moodByHabit,
+  onThisDay,
+  saveEntry,
+  setJournalPrompts,
+} from './journal'
 import { todaySummary } from './today'
 import {
   activeSession,
@@ -184,6 +195,16 @@ export const api = {
   previewImport,
   importExpenses,
   exportExpensesCSV,
+  // Journal
+  journalDay,
+  saveEntry,
+  listEntries,
+  onThisDay,
+  journalStats,
+  moodByHabit,
+  journalPrompts,
+  setJournalPrompts,
+  emotionChoices,
 } satisfies Record<string, (db: Database, payload: never) => unknown>
 
 export type Api = typeof api

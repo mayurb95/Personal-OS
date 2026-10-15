@@ -223,6 +223,7 @@ export function search(db: Database, p: { query: string; limit?: number }): Sear
   return db
     .selectObjects(
       `SELECT r.id, r.title, r.collection_id, c.kind, c.name, c.icon,
+              coalesce(json_extract(r.data, '$.day'), json_extract(r.data, '$.date')) AS day,
               snippet(records_fts, 1, '', '', '…', 12) AS snippet
        FROM records_fts
        JOIN records r ON r.rowid = records_fts.rowid
@@ -240,5 +241,6 @@ export function search(db: Database, p: { query: string; limit?: number }): Sear
       collectionIcon: String(r.icon),
       title: String(r.title),
       snippet: String(r.snippet ?? ''),
+      day: r.day == null ? null : String(r.day),
     }))
 }

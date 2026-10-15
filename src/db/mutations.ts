@@ -51,4 +51,6 @@ export const MUTATIONS: ReadonlySet<string> = new Set<ApiName | 'markBackedUp' |
   'deleteRecurring',
   'postDueRecurring',
   'importExpenses',
+  'saveEntry',
+  'setJournalPrompts',
 ])

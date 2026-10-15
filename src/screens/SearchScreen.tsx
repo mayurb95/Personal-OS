@@ -11,6 +11,8 @@ import { Page } from '../ui/Screen'
 export function hitLink(hit: SearchHit): string {
   if (hit.collectionKind === 'tasks') return `/tasks/${hit.id}`
   if (hit.collectionKind === 'habits') return `/habits/${hit.id}`
+  if (hit.collectionKind === 'expenses') return hit.day ? `/money?month=${hit.day.slice(0, 7)}` : '/money'
+  if (hit.collectionKind === 'journal') return hit.day ? `/journal/${hit.day}` : '/journal'
   return `/records/${hit.id}`
 }
 

@@ -121,4 +121,6 @@ export interface SearchHit {
   collectionIcon: string
   title: string
   snippet: string
+  /** Journal day or expense date, for linking. */
+  day: string | null
 }
